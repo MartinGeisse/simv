@@ -1,0 +1,119 @@
+
+All the 32-bit instructions in the base ISA have their lowest two bits set to 11
+
+base + 0: xxxxxxxxxxxbbb11 (bbb != 111)
+base + 2: xxxxxxxxxxxxxxxx
+
+We consider it a feature that any length of instruction containing all zero bits is not legal, as this quickly traps
+erroneous jumps into zeroed memory regions. Similarly, we also reserve the instruction encoding containing all ones
+to be an illegal instruction, to catch the other common pattern observed with unprogrammed non-volatile memory
+devices, disconnected memory buses, or broken memory devices.
+
+We use the term exception to refer to an unusual condition occurring at run time associated with an instruction in the
+current RISC-V thread. We use the term trap to refer to the synchronous transfer of control to a trap handler caused
+by an exceptional condition occurring within a RISC-V thread. Trap handlers usually execute in a more privileged
+environment.
+
+We use the term interrupt to refer to an external event that occurs asynchronously to the current RISC-V thread. When
+an interrupt that must be serviced occurs, some instruction is selected to receive an interrupt exception and
+subsequently experiences a trap.
+
+The instruction descriptions in following chapters describe conditions that raise an exception dur- ing execution.
+Whether and how these are converted into traps is dependent on the execution environment, though the expectation is
+that most environments will take a precise trap when an exception is signaled (except for floating-point exceptions,
+which, in the standard floating-point extensions, do not cause traps).
+
+... though a simple implementation might cover the eight SCALL/SBREAK/CSRR* instructions with a single SYSTEM hardware
+instruction that always traps and might be able to implement the FENCE and FENCE.I in- structions as NOPs, reducing
+hardware instruction count to 38 total. RV32I can emulate almost any other ISA extension (except the A extension,
+which requires additional hardware support for atomicity).
+
+There is no hardwired subroutine return address link register, but the standard software calling convention uses
+register x1 to hold the return address on a call.
+
+XLEN = 32
+
+Registers: zero, 31 x general purpose, pc
+
+CSR = control / status register
+
+CSR*, ECALL, EBREAK -> single SYSTEM instruction + software emu (?)
+    usermode sim: subclass decides
+    system sim: default impl transfers control to trap handler
+
+We define the full set of CSR instructions here, although in the standard user-level base ISA, only a handful of
+read-only counter CSRs are accessible.
+
+Implement division (possibly even multiplication) in software instruction emulation in v1.
+
+-----------------------------------------------------------------------------------------------------------------------
+
+Kinds of simulation:
+
+(A) instruction translation
+
+1. single-threaded high-performance user-mode, instruction pre-translation. Useful to test applications and user-mode
+	system programs.
+	- peripherals simulated at syscall level.
+
+2. multi-process instruction pre-translation. May be useful to test interaction of applications. May be based on multiple
+	instances of (1) for multiple single-threaded user-mode applications.
+	- peripherals simulated at syscall level.
+
+3. General instruction pre-translation. Probably (1) with shared memory and system-mode support, but cannot simulate
+	preemption correctly. May be able to support synchronous user-to-kernel switching (syscalls).
+	- peripherals simulated at syscall or I/O instruction or super-syscall level.
+
+(B) instruction-level simulation
+
+1. user-mode instruction-level simulator
+	- peripherals simulated at syscall level.
+
+2. kernel-mode instruction-level simulator
+	- peripherals simulated at I/O instruction or super-syscall level.
+
+3. kernel-mode instruction-level simulator with RTL bridge
+	- peripherals simulated at RTL or transaction or I/O instruction or super-syscall level.
+
+(C) RTL simulation
+
+1. cycle, multi-cycle, pipeline simulation without sample/update separation
+	- peripherals simulated at RTL or transaction level
+
+2. (1) with RTL bridge. Needs sample/update separation only at the bridge.
+	- peripherals simulated at RTL or transaction level
+
+3. structural RTL implementation; sample/update separation at the parts.
+	(different levels possible, down to full RTL which is synthesizable)
+	- peripherals simulated at RTL or transaction level
+
+---
+
+Implement the above with few components that can be combined:
+- blockwise instruction translation component
+	- raw (non-blockwise) instruction translation as an option for the translator (non-composable) -- little use?
+	- block size / boundaries could be configurable
+	- configurable handling for syscall (incl. super-syscall), IO and unknown instruction
+	- implements Item for composability / concurrency -- allows multiple instances
+- instruction-level simulator
+	- configurable handling for syscall (incl. super-syscall), IO and unknown instruction
+	- implements Item for composability / concurrency -- allows multiple instances
+	- (RTL bridge)
+
+Adapters:
+- RTL-to-transaction signal bridge (generic, not related to RISC-V)
+
+- transaction-to-RTL signal bridge (generic, not related to RISC-V)
+
+- RTL-to-transaction bus master bridge (generic, not related to RISC-V)
+
+- transaction-to-RTL bus master bridge (generic, not related to RISC-V)
+
+- RTL-to-transaction bus slave bridge (generic, not related to RISC-V)
+
+- transaction-to-RTL bus slave bridge (generic, not related to RISC-V)
+
+
+---
+
+https://github.com/riscv/riscv-compliance

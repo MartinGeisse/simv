@@ -1,0 +1,3 @@
+
+Ways in which this implementation deviates from the specification:
+- v1: all CSRs are read-only. Trying to write to a CSR has no effect, i.e. will fail silently instead of trapping.
