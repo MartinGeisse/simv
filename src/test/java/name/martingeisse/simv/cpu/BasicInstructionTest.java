@@ -385,4 +385,35 @@ public class BasicInstructionTest {
 
     //endregion
 
+    //region AUIPC, MISC-MEM (as NOP)
+
+    @Test
+    @Program({
+            "auipc x1, 1",
+            "auipc x2, 1",
+            "auipc x3, 1",
+    })
+    public void testAuipc() {
+        execute();
+        testMachine.assertRegistersIntactExcept(1, 2, 3);
+        Assert.assertEquals(0x1000, cpu.getRegister(1));
+        Assert.assertEquals(0x1004, cpu.getRegister(2));
+        Assert.assertEquals(0x1008, cpu.getRegister(3));
+    }
+
+    @Test
+    @Program({
+            "fence",
+    })
+    public void testMiscMemAsNop() {
+        execute();
+        Assert.assertEquals(4, cpu.getPc());
+        testMachine.assertRegistersIntactExcept();
+    }
+
+    //endregion
+
+
+    // TODO load, store, branch, jal, jalr
+
 }
