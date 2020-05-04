@@ -1,6 +1,7 @@
 package name.martingeisse.simv.cpu;
 
 import name.martingeisse.simv.bus.slave.BusRam;
+import name.martingeisse.simv.cpu.testutil.BuildProgramsMain;
 import name.martingeisse.simv.cpu.testutil.Program;
 import name.martingeisse.simv.cpu.testutil.ProgramStorageKey;
 import name.martingeisse.simv.cpu.testutil.TestMachine;
@@ -16,6 +17,12 @@ public class BasicInstructionTest {
     private Cpu cpu;
     private BusRam ram;
     private boolean hasBeenRun = false;
+
+    // TODO remove
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+        BuildProgramsMain.main(new String[0]);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -44,6 +51,29 @@ public class BasicInstructionTest {
         execute();
         Assert.assertEquals(4, cpu.getPc());
         testMachine.assertRegistersIntactExcept();
+    }
+
+    @Test
+    @Program("addi x1, x0, 42")
+    public void testLoadSmallConstant() {
+        execute();
+        Assert.assertEquals(4, cpu.getPc());
+        testMachine.assertRegistersIntactExcept(1);
+        Assert.assertEquals(42, cpu.getRegister(1));
+    }
+
+    @Test
+    @Program({
+            "addi x1, x0, 42",
+            "addi x2, x1, 5",
+            "addi x2, x2, 2",
+    })
+    public void testAddi() {
+        execute();
+        Assert.assertEquals(12, cpu.getPc());
+        testMachine.assertRegistersIntactExcept(1, 2);
+        Assert.assertEquals(42, cpu.getRegister(1));
+        Assert.assertEquals(49, cpu.getRegister(2));
     }
 
 }
