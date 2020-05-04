@@ -23,7 +23,9 @@ public class BuildProgramsMain {
                     continue;
                 }
                 ProgramStorageKey key = new ProgramStorageKey(testClass, testMethod.getName());
-                FileUtils.write(key.getSourceCodeFile(), StringUtils.join(programAnnotation.value(), '\n'));
+                String sourceCode = ".option norvc\n.text\nentryPoint:\n" +
+                    StringUtils.join(programAnnotation.value(), '\n');
+                FileUtils.write(key.getSourceCodeFile(), sourceCode);
                 compile(key);
             }
         }
@@ -34,12 +36,13 @@ public class BuildProgramsMain {
         String sourceFile = key.getSourceCodeFile().getAbsolutePath();
         String objectFile = key.getObjectFile().getAbsolutePath();
         String elfFile = key.getElfFile().getAbsolutePath();
+        String mapFile = key.getMapFile().getAbsolutePath();
         String imageFile = key.getImageFile().getAbsolutePath();
 
         exec(tool("gcc"), "-msmall-data-limit=100000", "-march=rv32im", "-mabi=ilp32", "-fno-exceptions",
                 "-Wall", "-fno-tree-loop-distribute-patterns", "-c",
                 "-o", objectFile, sourceFile);
-        exec(tool("ld"), "-Map=build/program.map", "-A", "rv32im", "-N", "-Ttext=0x80200000", "-e", "entryPoint",
+        exec(tool("ld"), "-Map=" + mapFile, "-A", "rv32im", "-N", "-Ttext=0x80200000", "-e", "entryPoint",
                 "-o", elfFile, objectFile);
         exec(tool("objcopy"), "-j", ".text", "-j", ".rodata", "-j", ".sdata", "-I", "elf32-littleriscv", "-O", "binary",
                 elfFile, imageFile);

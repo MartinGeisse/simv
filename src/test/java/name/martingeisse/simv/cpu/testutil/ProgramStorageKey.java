@@ -38,6 +38,10 @@ public final class ProgramStorageKey {
         return new File(BASE_FOLDER, getFullName() + ".elf");
     }
 
+    public File getMapFile() {
+        return new File(BASE_FOLDER, getFullName() + ".map");
+    }
+
     public File getImageFile() {
         return new File(BASE_FOLDER, getFullName() + ".bin");
     }
