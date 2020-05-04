@@ -208,7 +208,7 @@ public abstract class IoInstruction implements Instruction {
 
         @Override
         protected void executeInternal(Cpu cpu, int writeData, int wordAddress, int byteOffset) {
-            int readData = read(cpu, wordAddress) >> byteOffset * 8;
+            int readData = read(cpu, wordAddress) >>> byteOffset * 8;
             if (byteOffset == 3) {
                 readData |= read(cpu, wordAddress + 1) << 8;
             }
@@ -239,15 +239,15 @@ public abstract class IoInstruction implements Instruction {
                     break;
 
                 case 1:
-                    readData = (read(cpu, wordAddress) >> 8) | (read(cpu, wordAddress) << 24);
+                    readData = (read(cpu, wordAddress) >>> 8) | (read(cpu, wordAddress + 1) << 24);
                     break;
 
                 case 2:
-                    readData = (read(cpu, wordAddress) >> 16) | (read(cpu, wordAddress) << 16);
+                    readData = (read(cpu, wordAddress) >>> 16) | (read(cpu, wordAddress + 1) << 16);
                     break;
 
                 case 3:
-                    readData = (read(cpu, wordAddress) >> 24) | (read(cpu, wordAddress) << 8);
+                    readData = (read(cpu, wordAddress) >>> 24) | (read(cpu, wordAddress + 1) << 8);
                     break;
 
                 default:

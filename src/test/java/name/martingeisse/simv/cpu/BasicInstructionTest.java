@@ -436,14 +436,64 @@ public class BasicInstructionTest {
     })
     public void testLoad() {
         cpu.setSupportsMisalignedIo(true);
-        ram.setValue(600, 0x1234abcd);
-        ram.setValue(601, 0xef567890);
+        ram.setValue(150, 0x1234abcd); // byte address 600 is word address 150
+        ram.setValue(151, 0xef567890);
         execute();
         testMachine.assertRegistersIntact(26, 27, 28, 29, 30, 31);
-        testMachine.assertRegisterValues(1, 2, 3);
+        Assert.assertEquals(0, cpu.getRegister(0));
+        testMachine.assertRegisterValues(
+                0x1234abcd, 0x901234ab, 0x78901234, 0x56789012, 0xef567890,
+                0xffffabcd, 0x34ab, 0x1234, 0xffff9012, 0x7890,
+                0xabcd, 0x34ab, 0x1234, 0x9012, 0x7890,
+                0xffffffcd, 0xffffffab, 0x34, 0x12, 0xffffff90,
+                0xcd, 0xab, 0x34, 0x12, 0x90
+        );
     }
 
-    // TODO store, addressing, exception when misaligned IO is forbidden
+    @Test
+    @Program({
+            "li x1, 0x12345678",
+
+            "sw x1, 600(x0)",
+            "sw x1, 605(x0)",
+            "sw x1, 610(x0)",
+            "sw x1, 615(x0)",
+            "sw x1, 620(x0)",
+
+            "sh x1, 624(x0)",
+            "sh x1, 627(x0)",
+            "sh x1, 630(x0)",
+            "sh x1, 633(x0)",
+            "sh x1, 636(x0)",
+
+            "sb x1, 640(x0)",
+            "sb x1, 641(x0)",
+            "sb x1, 642(x0)",
+            "sb x1, 643(x0)",
+            "sb x1, 644(x0)",
+    })
+    public void testStore() {
+        cpu.setSupportsMisalignedIo(true);
+        execute();
+        testMachine.assertRegistersIntactExcept(1);
+
+        Assert.assertEquals(0x12345678, ram.getValue(150)); // byte address 600 is word address 150
+        Assert.assertEquals(0x34567800, ram.getValue(151));
+        Assert.assertEquals(0x56780012, ram.getValue(152));
+        Assert.assertEquals(0x78001234, ram.getValue(153));
+        Assert.assertEquals(0x00123456, ram.getValue(154));
+        Assert.assertEquals(0x12345678, ram.getValue(155));
+
+        Assert.assertEquals(0x78005678, ram.getValue(156));
+        Assert.assertEquals(0x56780056, ram.getValue(157));
+        Assert.assertEquals(0x00567800, ram.getValue(158));
+        Assert.assertEquals(0x00005678, ram.getValue(159));
+
+        Assert.assertEquals(0x78787878, ram.getValue(160));
+        Assert.assertEquals(0x00000078, ram.getValue(161));
+    }
+
+    // TODO addressing, exception when misaligned IO is forbidden
 
     //endregion
 
