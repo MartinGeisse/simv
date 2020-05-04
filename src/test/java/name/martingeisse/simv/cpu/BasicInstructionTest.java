@@ -323,4 +323,66 @@ public class BasicInstructionTest {
 
     //endregion
 
+    //region and, or, xor
+
+    @Test
+    @Program({
+            "addi x1, x0, 43", // 32 + 8 + 2 + 1
+            "andi x2, x1, 7",
+            "andi x3, x1, 0",
+            "andi x4, x1, -1",
+
+            // sign extension
+            "addi x5, x0, -1",
+            "andi x5, x5, -1",
+    })
+    public void testAndi() {
+        execute();
+        testMachine.assertRegistersIntactExcept(1, 2, 3, 4, 5);
+        Assert.assertEquals(3, cpu.getRegister(2));
+        Assert.assertEquals(0, cpu.getRegister(3));
+        Assert.assertEquals(43, cpu.getRegister(4));
+        Assert.assertEquals(-1, cpu.getRegister(5));
+    }
+
+    @Test
+    @Program({
+            "addi x1, x0, 43", // 32 + 8 + 2 + 1
+            "ori x2, x1, 7",
+            "ori x3, x1, 0",
+            "ori x4, x1, -1",
+
+            // sign extension
+            "ori x5, x0, -1",
+    })
+    public void testOri() {
+        execute();
+        testMachine.assertRegistersIntactExcept(1, 2, 3, 4, 5);
+        Assert.assertEquals(47, cpu.getRegister(2));
+        Assert.assertEquals(43, cpu.getRegister(3));
+        Assert.assertEquals(-1, cpu.getRegister(4));
+        Assert.assertEquals(-1, cpu.getRegister(5));
+    }
+
+    @Test
+    @Program({
+            "addi x1, x0, 43", // 32 + 8 + 2 + 1
+            "xori x2, x1, 7",
+            "xori x3, x1, 0",
+            "xori x4, x1, -1",
+
+            // sign extension
+            "xori x5, x0, -1",
+    })
+    public void testXori() {
+        execute();
+        testMachine.assertRegistersIntactExcept(1, 2, 3, 4, 5);
+        Assert.assertEquals(43 ^ 7, cpu.getRegister(2));
+        Assert.assertEquals(43, cpu.getRegister(3));
+        Assert.assertEquals(~43, cpu.getRegister(4));
+        Assert.assertEquals(-1, cpu.getRegister(5));
+    }
+
+    //endregion
+
 }
