@@ -65,7 +65,7 @@ public class BasicInstructionTest {
         execute();
         Assert.assertEquals(4, cpu.getPc());
         testMachine.assertRegistersIntactExcept(1);
-        Assert.assertEquals(42, cpu.getRegister(1));
+        testMachine.assertRegisterValues(42);
     }
 
     @Test
@@ -79,9 +79,7 @@ public class BasicInstructionTest {
         execute();
         Assert.assertEquals(16, cpu.getPc());
         testMachine.assertRegistersIntactExcept(1, 2, 3);
-        Assert.assertEquals(42, cpu.getRegister(1));
-        Assert.assertEquals(49, cpu.getRegister(2));
-        Assert.assertEquals(32, cpu.getRegister(3));
+        testMachine.assertRegisterValues(42, 49, 32);
     }
 
     @Test
@@ -131,9 +129,7 @@ public class BasicInstructionTest {
         execute();
         testMachine.assertRegistersIntactExcept(1, 2, 3);
         Assert.assertEquals(0, cpu.getRegister(0));
-        Assert.assertEquals(0x1000, cpu.getRegister(1));
-        Assert.assertEquals(0x2000, cpu.getRegister(2));
-        Assert.assertEquals(0xfffff000, cpu.getRegister(3));
+        testMachine.assertRegisterValues(0x1000, 0x2000, 0xfffff000);
     }
 
     //endregion
@@ -339,10 +335,7 @@ public class BasicInstructionTest {
     public void testAndi() {
         execute();
         testMachine.assertRegistersIntactExcept(1, 2, 3, 4, 5);
-        Assert.assertEquals(3, cpu.getRegister(2));
-        Assert.assertEquals(0, cpu.getRegister(3));
-        Assert.assertEquals(43, cpu.getRegister(4));
-        Assert.assertEquals(-1, cpu.getRegister(5));
+        testMachine.assertRegisterValues(43, 3, 0, 43, -1);
     }
 
     @Test
@@ -358,10 +351,7 @@ public class BasicInstructionTest {
     public void testOri() {
         execute();
         testMachine.assertRegistersIntactExcept(1, 2, 3, 4, 5);
-        Assert.assertEquals(47, cpu.getRegister(2));
-        Assert.assertEquals(43, cpu.getRegister(3));
-        Assert.assertEquals(-1, cpu.getRegister(4));
-        Assert.assertEquals(-1, cpu.getRegister(5));
+        testMachine.assertRegisterValues(43, 47, 43, -1, -1);
     }
 
     @Test
@@ -377,10 +367,7 @@ public class BasicInstructionTest {
     public void testXori() {
         execute();
         testMachine.assertRegistersIntactExcept(1, 2, 3, 4, 5);
-        Assert.assertEquals(43 ^ 7, cpu.getRegister(2));
-        Assert.assertEquals(43, cpu.getRegister(3));
-        Assert.assertEquals(~43, cpu.getRegister(4));
-        Assert.assertEquals(-1, cpu.getRegister(5));
+        testMachine.assertRegisterValues(43, 43 ^ 7, 43, ~43, -1);
     }
 
     //endregion
@@ -396,9 +383,7 @@ public class BasicInstructionTest {
     public void testAuipc() {
         execute();
         testMachine.assertRegistersIntactExcept(1, 2, 3);
-        Assert.assertEquals(0x1000, cpu.getRegister(1));
-        Assert.assertEquals(0x1004, cpu.getRegister(2));
-        Assert.assertEquals(0x1008, cpu.getRegister(3));
+        testMachine.assertRegisterValues(0x1000, 0x1004, 0x1008);
     }
 
     @Test
@@ -413,7 +398,59 @@ public class BasicInstructionTest {
 
     //endregion
 
+    //region load, store
 
-    // TODO load, store, branch, jal, jalr
+    @Test
+    @Program({
+            "lw x0, 600(x0)",
+
+            "lw x1, 600(x0)",
+            "lw x2, 601(x0)",
+            "lw x3, 602(x0)",
+            "lw x4, 603(x0)",
+            "lw x5, 604(x0)",
+
+            "lh x6, 600(x0)",
+            "lh x7, 601(x0)",
+            "lh x8, 602(x0)",
+            "lh x9, 603(x0)",
+            "lh x10, 604(x0)",
+
+            "lhu x11, 600(x0)",
+            "lhu x12, 601(x0)",
+            "lhu x13, 602(x0)",
+            "lhu x14, 603(x0)",
+            "lhu x15, 604(x0)",
+
+            "lb x16, 600(x0)",
+            "lb x17, 601(x0)",
+            "lb x18, 602(x0)",
+            "lb x19, 603(x0)",
+            "lb x20, 604(x0)",
+
+            "lbu x21, 600(x0)",
+            "lbu x22, 601(x0)",
+            "lbu x23, 602(x0)",
+            "lbu x24, 603(x0)",
+            "lbu x25, 604(x0)",
+    })
+    public void testLoad() {
+        cpu.setSupportsMisalignedIo(true);
+        ram.setValue(600, 0x1234abcd);
+        ram.setValue(601, 0xef567890);
+        execute();
+        testMachine.assertRegistersIntact(26, 27, 28, 29, 30, 31);
+        testMachine.assertRegisterValues(1, 2, 3);
+    }
+
+    // TODO store, addressing, exception when misaligned IO is forbidden
+
+    //endregion
+
+    //region branch, jal, jalr
+
+    // TODO
+
+    //endregion
 
 }

@@ -65,6 +65,14 @@ public final class TestMachine {
         }
     }
 
+    public void assertRegistersIntact(int... indices) {
+        for (int index : indices) {
+            if (cpu.getRegister(index) != OVERWRITE_CANARY) {
+                Assert.fail("register x" + index + " was overwritten");
+            }
+        }
+    }
+
     public void assertRegistersIntactExcept(int... indices) {
         outer: for (int i = 1; i < 32; i++) {
             if (cpu.getRegister(i) != OVERWRITE_CANARY) {
@@ -75,6 +83,13 @@ public final class TestMachine {
                 }
                 Assert.fail("register x" + i + " was overwritten");
             }
+        }
+    }
+
+    public void assertRegisterValues(int... values) {
+        for (int i = 0; i < values.length; i++) {
+            int reg = i + 1;
+            Assert.assertEquals("register x" + reg, values[i], cpu.getRegister(reg));
         }
     }
 
