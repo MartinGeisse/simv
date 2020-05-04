@@ -67,13 +67,51 @@ public class BasicInstructionTest {
             "addi x1, x0, 42",
             "addi x2, x1, 5",
             "addi x2, x2, 2",
+            "addi x3, x1, -10"
     })
     public void testAddi() {
         execute();
-        Assert.assertEquals(12, cpu.getPc());
-        testMachine.assertRegistersIntactExcept(1, 2);
+        Assert.assertEquals(16, cpu.getPc());
+        testMachine.assertRegistersIntactExcept(1, 2, 3);
         Assert.assertEquals(42, cpu.getRegister(1));
         Assert.assertEquals(49, cpu.getRegister(2));
+        Assert.assertEquals(32, cpu.getRegister(3));
+    }
+
+    @Test
+    @Program({
+            "addi x1, x0, 42",
+            "addi x2, x0, 5",
+            "add x3, x1, x2",
+    })
+    public void testAdd() {
+        execute();
+        testMachine.assertRegistersIntactExcept(1, 2, 3);
+        Assert.assertEquals(47, cpu.getRegister(3));
+    }
+
+    @Test
+    @Program({
+            "addi x1, x0, 42",
+            "addi x0, x0, 5",
+            "add x0, x0, x1",
+    })
+    public void testWriteToZeroRegister() {
+        execute();
+        testMachine.assertRegistersIntactExcept(1);
+        Assert.assertEquals(0, cpu.getRegister(0));
+    }
+
+    @Test
+    @Program({
+            "addi x1, x0, 42",
+            "addi x2, x0, 5",
+            "sub x3, x1, x2",
+    })
+    public void testSub() {
+        execute();
+        testMachine.assertRegistersIntactExcept(1, 2, 3);
+        Assert.assertEquals(37, cpu.getRegister(3));
     }
 
 }
