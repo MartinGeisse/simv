@@ -1,6 +1,7 @@
 package name.martingeisse.simv.cpu;
 
 import name.martingeisse.simv.bus.slave.BusRam;
+import name.martingeisse.simv.cpu.io.IoUnit;
 import name.martingeisse.simv.cpu.testutil.BuildProgramsMain;
 import name.martingeisse.simv.cpu.testutil.Program;
 import name.martingeisse.simv.cpu.testutil.ProgramStorageKey;
@@ -493,7 +494,37 @@ public class BasicInstructionTest {
         Assert.assertEquals(0x00000078, ram.getValue(161));
     }
 
-    // TODO addressing, exception when misaligned IO is forbidden
+    @Test
+    @Program({
+            "li x1, 0x12345678",
+            "lw x2, 16(x1)",
+            "sw x2, -16(x1)",
+    })
+    public void testAddressing() {
+        IoUnit oldIoUnit = cpu.getIoUnit();
+        cpu.setIoUnit(new IoUnit() {
+
+            @Override
+            public int fetchInstruction(int wordAddress) {
+                return oldIoUnit.fetchInstruction(wordAddress);
+            }
+
+            @Override
+            public int read(int wordAddress) {
+                Assert.assertEquals(0x12345688 >> 2, wordAddress);
+                return 0;
+            }
+
+            @Override
+            public void write(int wordAddress, int data, int byteMask) {
+                Assert.assertEquals(0x12345668 >> 2, wordAddress);
+            }
+
+        });
+        execute();
+    }
+
+        // TODO test exception when misaligned IO is forbidden
 
     //endregion
 
