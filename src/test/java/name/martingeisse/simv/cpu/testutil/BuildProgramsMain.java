@@ -24,7 +24,8 @@ public class BuildProgramsMain {
                 }
                 ProgramStorageKey key = new ProgramStorageKey(testClass, testMethod.getName());
                 String sourceCode = ".option norvc\n.text\nentryPoint:\n" +
-                    StringUtils.join(programAnnotation.value(), '\n');
+                    StringUtils.join(programAnnotation.value(), '\n') +
+                    "\n.text\n.word -4\n";
                 FileUtils.write(key.getSourceCodeFile(), sourceCode);
                 compile(key);
             }
