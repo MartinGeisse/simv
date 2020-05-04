@@ -30,13 +30,20 @@ public class BuildProgramsMain {
     }
 
     private static void compile(ProgramStorageKey key) throws Exception {
+
+        String sourceFile = key.getSourceCodeFile().getAbsolutePath();
+        String objectFile = key.getObjectFile().getAbsolutePath();
+        String elfFile = key.getElfFile().getAbsolutePath();
+        String imageFile = key.getImageFile().getAbsolutePath();
+
         exec(tool("gcc"), "-msmall-data-limit=100000", "-march=rv32im", "-mabi=ilp32", "-fno-exceptions",
                 "-Wall", "-fno-tree-loop-distribute-patterns", "-c",
-                "-o", key.getObjectFile().getPath(), key.getSourceCodeFile().getPath());
+                "-o", objectFile, sourceFile);
         exec(tool("ld"), "-Map=build/program.map", "-A", "rv32im", "-N", "-Ttext=0x80200000", "-e", "entryPoint",
-                "-o", key.getElfFile().getPath(), key.getObjectFile().getPath());
+                "-o", elfFile, objectFile);
         exec(tool("objcopy"), "-j", ".text", "-j", ".rodata", "-j", ".sdata", "-I", "elf32-littleriscv", "-O", "binary",
-                key.getElfFile().getPath(), key.getImageFile().getPath());
+                elfFile, imageFile);
+
         if (!key.getImageFile().exists()) {
             throw new RuntimeException("output file does not exist: " + key.getImageFile());
         }
