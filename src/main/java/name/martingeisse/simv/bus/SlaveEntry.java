@@ -6,28 +6,23 @@ package name.martingeisse.simv.bus;
 public final class SlaveEntry {
 
 	private final int address;
-	private final int localAddressBits;
 	private final int upperAddressMask;
 	private final int lowerAddressMask;
 	private final BusSlave slave;
 
-	public SlaveEntry(int address, int localAddressBits, BusSlave slave) {
+	public SlaveEntry(int address, BusSlave slave) {
 		this.address = address;
-		this.localAddressBits = localAddressBits;
-		this.lowerAddressMask = (1 << localAddressBits) - 1;
+		this.lowerAddressMask = (1 << slave.getLocalAddressBits()) - 1;
 		this.upperAddressMask = ~lowerAddressMask;
 		this.slave = slave;
 		if ((address & lowerAddressMask) != 0) {
-			throw new IllegalArgumentException("device address has local address bits set. Number of local bits: " + localAddressBits + ", address: " + address);
+			throw new IllegalArgumentException("device address has local address bits set. Number of local bits: " +
+					slave.getLocalAddressBits() + ", address: " + address);
 		}
 	}
 
 	public int getAddress() {
 		return address;
-	}
-
-	public int getLocalAddressBits() {
-		return localAddressBits;
 	}
 
 	public int getUpperAddressMask() {
@@ -54,6 +49,11 @@ public final class SlaveEntry {
 	// ignores upper address bits
 	void write(int address, int data, int byteMask) {
 		slave.write(address & lowerAddressMask, data, byteMask);
+	}
+
+	boolean overlaps(SlaveEntry other) {
+		return (address <= other.getAddress() + other.getLowerAddressMask() &&
+			other.getAddress() <= address + lowerAddressMask);
 	}
 
 }

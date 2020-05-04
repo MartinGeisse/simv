@@ -18,11 +18,16 @@ public final class Bus {
     }
 
     public void addSlave(SlaveEntry entry) {
+        for (SlaveEntry existing : slaveEntries) {
+            if (entry.overlaps(existing)) {
+                throw new IllegalArgumentException("bus slaves overlap");
+            }
+        }
         slaveEntries.add(entry);
     }
 
-    public void addSlave(int address, int addressMask, BusSlave slave) {
-        addSlave(new SlaveEntry(address, addressMask, slave));
+    public void addSlave(int address, BusSlave slave) {
+        addSlave(new SlaveEntry(address, slave));
     }
 
     public SlaveEntry getMatchingEntry(int address) {
@@ -35,8 +40,7 @@ public final class Bus {
     }
 
     public int read(int address) {
-        // no delay for now
-        // for now, reads 0 if no matching slave was found
+        // For now, reads 0 if no matching slave was found. Should actually cause a CPU exception.
         SlaveEntry slaveEntry = getMatchingEntry(address);
         if (slaveEntry == null) {
             return 0;
@@ -52,7 +56,7 @@ public final class Bus {
         SlaveEntry slaveEntry = getMatchingEntry(address);
         if (slaveEntry != null) {
             slaveEntry.write(address, data, byteMask);
-        }
+        } // else: should actually cause a CPU exception
     }
 
 }

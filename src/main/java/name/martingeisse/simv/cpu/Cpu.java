@@ -19,7 +19,7 @@ import name.martingeisse.simv.cpu.muldiv.MultiplyDivideUnit;
  * This implementation is little-endian only, which in a word-based addressing scheme means: For an aligned 4-byte block
  * (i.e. one addressing word), accessing the lowest byte accesses the 8 bits with lowest significance in the 32-bit value.
  */
-public abstract class Cpu {
+public final class Cpu {
 
     private static final int WORD_ADDRESS_MASK = 0x3fff_ffff;
 

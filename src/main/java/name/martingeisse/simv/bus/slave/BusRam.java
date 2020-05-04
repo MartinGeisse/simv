@@ -26,23 +26,19 @@ public final class BusRam implements BusSlave {
             0xffffffff,
     };
 
-    private final int addressBits;
+    private final int localAddressBits;
     private final int addressMask;
     private final int[] data;
 
-    public BusRam(int addressBits) {
-        this.addressBits = addressBits;
-        this.data = new int[1 << addressBits];
+    public BusRam(int localAddressBits) {
+        this.localAddressBits = localAddressBits;
+        this.data = new int[1 << this.localAddressBits];
         this.addressMask = data.length - 1;
-    }
-
-    public int getAddressBits() {
-        return addressBits;
     }
 
     @Override
     public int getLocalAddressBits() {
-        return addressBits;
+        return localAddressBits;
     }
 
     public int getSize() {
