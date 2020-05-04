@@ -277,4 +277,50 @@ public class BasicInstructionTest {
 
     //endregion
 
+    //region slt, sltu
+
+    @Test
+    @Program({
+            "addi x1, x0, 42",
+            "addi x2, x0, 42",
+            "addi x3, x0, 41",
+            "addi x4, x0, 43",
+            "addi x5, x0, -1",
+            "slt x2, x1, x2",
+            "slt x3, x1, x3",
+            "slt x4, x1, x4",
+            "slt x5, x1, x5",
+    })
+    public void testSlt() {
+        execute();
+        testMachine.assertRegistersIntactExcept(1, 2, 3, 4, 5);
+        Assert.assertEquals(0, cpu.getRegister(2));
+        Assert.assertEquals(0, cpu.getRegister(3));
+        Assert.assertEquals(1, cpu.getRegister(4));
+        Assert.assertEquals(0, cpu.getRegister(5));
+    }
+
+    @Test
+    @Program({
+            "addi x1, x0, 42",
+            "addi x2, x0, 42",
+            "addi x3, x0, 41",
+            "addi x4, x0, 43",
+            "addi x5, x0, -1",
+            "sltu x2, x1, x2",
+            "sltu x3, x1, x3",
+            "sltu x4, x1, x4",
+            "sltu x5, x1, x5",
+    })
+    public void testSltu() {
+        execute();
+        testMachine.assertRegistersIntactExcept(1, 2, 3, 4, 5);
+        Assert.assertEquals(0, cpu.getRegister(2));
+        Assert.assertEquals(0, cpu.getRegister(3));
+        Assert.assertEquals(1, cpu.getRegister(4));
+        Assert.assertEquals(1, cpu.getRegister(5));
+    }
+
+    //endregion
+
 }
