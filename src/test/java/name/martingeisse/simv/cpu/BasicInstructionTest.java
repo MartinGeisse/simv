@@ -10,6 +10,8 @@ import org.junit.rules.TestName;
 
 public class BasicInstructionTest {
 
+    //region support
+
     @Rule
     public TestName testName = new TestName();
 
@@ -44,6 +46,10 @@ public class BasicInstructionTest {
             cpu.step();
         }
     }
+
+    //endregion
+
+    //region basic, addi, add, sub, lui
 
     @Test
     @Program("addi x0, x0, 0")
@@ -116,6 +122,26 @@ public class BasicInstructionTest {
 
     @Test
     @Program({
+            "lui x0, 1",
+            "lui x1, 1",
+            "lui x2, 2",
+            "lui x3, 0xfffff",
+    })
+    public void testLui() {
+        execute();
+        testMachine.assertRegistersIntactExcept(1, 2, 3);
+        Assert.assertEquals(0, cpu.getRegister(0));
+        Assert.assertEquals(0x1000, cpu.getRegister(1));
+        Assert.assertEquals(0x2000, cpu.getRegister(2));
+        Assert.assertEquals(0xfffff000, cpu.getRegister(3));
+    }
+
+    //endregion
+
+    //region shift
+
+    @Test
+    @Program({
             "addi x1, x0, 42",
             "sll x1, x1, 1",
             "addi x2, x0, 42",
@@ -128,16 +154,19 @@ public class BasicInstructionTest {
             "sll x5, x5, 31",
             "addi x6, x0, 42",
             "sll x6, x6, 0",
+            "addi x7, x0, -9",
+            "sll x7, x7, 1",
     })
     public void testShiftLeftImmediate() {
         execute();
-        testMachine.assertRegistersIntactExcept(1, 2, 3, 4, 5, 6);
+        testMachine.assertRegistersIntactExcept(1, 2, 3, 4, 5, 6, 7);
         Assert.assertEquals(84, cpu.getRegister(1));
         Assert.assertEquals(168, cpu.getRegister(2));
         Assert.assertEquals(0xc0000000, cpu.getRegister(3));
         Assert.assertEquals(0x80000000, cpu.getRegister(4));
         Assert.assertEquals(0, cpu.getRegister(5));
         Assert.assertEquals(42, cpu.getRegister(6));
+        Assert.assertEquals(-18, cpu.getRegister(7));
     }
 
     @Test
@@ -155,5 +184,97 @@ public class BasicInstructionTest {
         Assert.assertEquals(168, cpu.getRegister(2));
         Assert.assertEquals(42, cpu.getRegister(3));
     }
+
+    @Test
+    @Program({
+            "addi x1, x0, 42",
+            "srl x1, x1, 1",
+            "addi x2, x0, 42",
+            "srl x2, x2, 2",
+            "li x3, 0xc0000000",
+            "srl x3, x3, 30",
+            "li x4, 0xc0000000",
+            "srl x4, x4, 31",
+            "li x5, 0x60000000",
+            "srl x5, x5, 31",
+            "addi x6, x0, 42",
+            "srl x6, x6, 0",
+            "addi x7, x0, -9", // 0xffff_fff7
+            "srl x7, x7, 1",
+    })
+    public void testShiftRightLogicalImmediate() {
+        execute();
+        testMachine.assertRegistersIntactExcept(1, 2, 3, 4, 5, 6, 7);
+        Assert.assertEquals(21, cpu.getRegister(1));
+        Assert.assertEquals(10, cpu.getRegister(2));
+        Assert.assertEquals(3, cpu.getRegister(3));
+        Assert.assertEquals(1, cpu.getRegister(4));
+        Assert.assertEquals(0, cpu.getRegister(5));
+        Assert.assertEquals(42, cpu.getRegister(6));
+        Assert.assertEquals(0x7fff_fffb, cpu.getRegister(7));
+    }
+
+    @Test
+    @Program({
+            "addi x1, x0, 42",
+            "addi x2, x0, 2",
+            "srl x2, x1, x2",
+            "addi x3, x0, 32",
+            "srl x3, x1, x3",
+    })
+    public void testShiftRightLogical() {
+        execute();
+        testMachine.assertRegistersIntactExcept(1, 2, 3);
+        Assert.assertEquals(42, cpu.getRegister(1));
+        Assert.assertEquals(10, cpu.getRegister(2));
+        Assert.assertEquals(42, cpu.getRegister(3));
+    }
+
+    @Test
+    @Program({
+            "addi x1, x0, 42",
+            "sra x1, x1, 1",
+            "addi x2, x0, 42",
+            "sra x2, x2, 2",
+            "li x3, 0xc0000000",
+            "sra x3, x3, 30",
+            "li x4, 0xc0000000",
+            "sra x4, x4, 31",
+            "li x5, 0x60000000",
+            "sra x5, x5, 31",
+            "addi x6, x0, 42",
+            "sra x6, x6, 0",
+            "addi x7, x0, -9",
+            "sra x7, x7, 1",
+    })
+    public void testShiftRightArithmeticImmediate() {
+        execute();
+        testMachine.assertRegistersIntactExcept(1, 2, 3, 4, 5, 6, 7);
+        Assert.assertEquals(21, cpu.getRegister(1));
+        Assert.assertEquals(10, cpu.getRegister(2));
+        Assert.assertEquals(-1, cpu.getRegister(3));
+        Assert.assertEquals(-1, cpu.getRegister(4));
+        Assert.assertEquals(0, cpu.getRegister(5));
+        Assert.assertEquals(42, cpu.getRegister(6));
+        Assert.assertEquals(-5, cpu.getRegister(7));
+    }
+
+    @Test
+    @Program({
+            "addi x1, x0, 42",
+            "addi x2, x0, 2",
+            "sra x2, x1, x2",
+            "addi x3, x0, 32",
+            "sra x3, x1, x3",
+    })
+    public void testShiftRightArithmetic() {
+        execute();
+        testMachine.assertRegistersIntactExcept(1, 2, 3);
+        Assert.assertEquals(42, cpu.getRegister(1));
+        Assert.assertEquals(10, cpu.getRegister(2));
+        Assert.assertEquals(42, cpu.getRegister(3));
+    }
+
+    //endregion
 
 }
