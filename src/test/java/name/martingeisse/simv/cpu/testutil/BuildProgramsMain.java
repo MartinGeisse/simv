@@ -23,7 +23,7 @@ public class BuildProgramsMain {
                     continue;
                 }
                 ProgramStorageKey key = new ProgramStorageKey(testClass, testMethod.getName());
-                FileUtils.write(key.getSourceCodeFile(), programAnnotation.value());
+                FileUtils.write(key.getSourceCodeFile(), StringUtils.join(programAnnotation.value(), '\n'));
                 compile(key);
             }
         }
