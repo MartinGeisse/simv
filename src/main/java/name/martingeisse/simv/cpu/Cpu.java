@@ -51,7 +51,7 @@ public final class Cpu {
     }
 
     public void setInstructionDecoder(InstructionDecoder instructionDecoder) {
-        this.instructionDecoder = (instructionDecoder == null ? StandardInstructionDecoder.INSTANCE : instructionDecoder);
+        this.instructionDecoder = (instructionDecoder == null ? new StandardInstructionDecoder(this) : instructionDecoder);
     }
 
     public IoUnit getIoUnit() {
@@ -146,7 +146,7 @@ public final class Cpu {
         int instructionWord = ioUnit.fetchInstruction((pc >> 2) & WORD_ADDRESS_MASK);
         Instruction instruction;
         try {
-            instruction = instructionDecoder.decode(this, instructionWord);
+            instruction = instructionDecoder.decode(instructionWord);
         } catch (InstructionDecodingException e) {
             triggerException(ExceptionType.ILLEGAL_INSTRUCTION);
             return;

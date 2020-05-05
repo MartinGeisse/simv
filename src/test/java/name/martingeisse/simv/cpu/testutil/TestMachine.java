@@ -23,12 +23,13 @@ public final class TestMachine {
     public TestMachine() {
         bus = new Bus();
         cpu = new Cpu();
+        StandardInstructionDecoder standardInstructionDecoder = new StandardInstructionDecoder(cpu);
         cpu.setIoUnit(new DefaultIoUnit(bus));
-        cpu.setInstructionDecoder((cpu, instructionWord) -> {
+        cpu.setInstructionDecoder(instructionWord -> {
             if (instructionWord == -4) {
                 return cpu2 -> setStopped(true);
             } else {
-                return StandardInstructionDecoder.INSTANCE.decode(cpu, instructionWord);
+                return standardInstructionDecoder.decode(instructionWord);
             }
         });
         ram = new BusRam(10);

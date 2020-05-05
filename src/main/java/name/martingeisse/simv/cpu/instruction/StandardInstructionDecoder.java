@@ -8,10 +8,14 @@ import name.martingeisse.simv.cpu.CpuImplementationUtil;
  */
 public final class StandardInstructionDecoder implements InstructionDecoder {
 
-    public static final StandardInstructionDecoder INSTANCE = new StandardInstructionDecoder();
+    private final Cpu cpu;
+
+    public StandardInstructionDecoder(Cpu cpu) {
+        this.cpu = cpu;
+    }
 
     @Override
-    public Instruction decode(Cpu cpu, int instructionWord) throws InstructionDecodingException {
+    public Instruction decode(int instructionWord) throws InstructionDecodingException {
         if ((instructionWord & 3) != 3) {
             return cpu.getExtendedInstructionUnit().decodeExtendedInstruction(instructionWord);
         }

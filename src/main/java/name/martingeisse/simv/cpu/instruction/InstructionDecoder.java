@@ -4,6 +4,6 @@ import name.martingeisse.simv.cpu.Cpu;
 
 public interface InstructionDecoder {
 
-    Instruction decode(Cpu cpu, int word) throws InstructionDecodingException;
+    Instruction decode(int word) throws InstructionDecodingException;
 
 }
