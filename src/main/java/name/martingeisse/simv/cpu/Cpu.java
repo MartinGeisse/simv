@@ -12,6 +12,7 @@ import name.martingeisse.simv.cpu.io.BrokenIoUnit;
 import name.martingeisse.simv.cpu.io.IoUnit;
 import name.martingeisse.simv.cpu.muldiv.ExceptionMultiplyDivideUnit;
 import name.martingeisse.simv.cpu.muldiv.MultiplyDivideUnit;
+import name.martingeisse.simv.cpu.system.SystemEngine;
 
 /**
  * Note: Interrupts are not supported for now.
@@ -28,6 +29,7 @@ public final class Cpu {
     private MultiplyDivideUnit multiplyDivideUnit;
     private FloatingPointUnit floatingPointUnit;
     private ExtendedInstructionUnit extendedInstructionUnit;
+    private SystemEngine systemEngine;
     private boolean supportsMisalignedIo;
 
     private final int[] registers = new int[32];
@@ -84,6 +86,14 @@ public final class Cpu {
 
     public void setExtendedInstructionUnit(ExtendedInstructionUnit extendedInstructionUnit) {
         this.extendedInstructionUnit = (extendedInstructionUnit == null ? new ExceptionExtendedInstructionUnit(this) : extendedInstructionUnit);
+    }
+
+    public SystemEngine getSystemEngine() {
+        return systemEngine;
+    }
+
+    public void setSystemEngine(SystemEngine systemEngine) {
+        this.systemEngine = systemEngine;
     }
 
     public boolean isSupportsMisalignedIo() {

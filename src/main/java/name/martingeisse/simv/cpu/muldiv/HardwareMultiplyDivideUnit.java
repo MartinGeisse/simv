@@ -16,7 +16,7 @@ public final class HardwareMultiplyDivideUnit implements MultiplyDivideUnit {
 	}
 
 	@Override
-	public void performMultiplayDivideInstruction(int instruction) {
+	public void performMultiplyDivideInstruction(int instruction) {
 		int x = cpu.getRegister(instruction >> 15);
 		int y = cpu.getRegister(instruction >> 20);
 		int func = (instruction >> 12) & 7;

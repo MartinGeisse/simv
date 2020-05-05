@@ -14,7 +14,7 @@ public final class ExceptionMultiplyDivideUnit implements MultiplyDivideUnit {
 	}
 
 	@Override
-	public void performMultiplayDivideInstruction(int instruction) {
+	public void performMultiplyDivideInstruction(int instruction) {
 		cpu.triggerException(Cpu.ExceptionType.ILLEGAL_INSTRUCTION);
 	}
 

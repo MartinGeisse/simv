@@ -202,8 +202,46 @@ public final class StandardInstructionDecoder implements InstructionDecoder {
                 return new JalInstruction(destinationRegisterIndex, offset);
             }
 
-            case 28: // SYSTEM
-                return new SystemInstruction();
+            case 28: { // SYSTEM
+                int csrIndex = instructionWord >>> 20;
+                int source = CpuImplementationUtil.getSourceRegisterIndex1(instructionWord);
+                int func3 = (instructionWord >> 12) & 7;
+                int destinationRegisterIndex = CpuImplementationUtil.getDestinationRegisterIndex(instructionWord);
+                switch (func3) {
+
+                    case 0: // ecall / ebreak
+                        return new SystemInstruction();
+
+                    case 1: // csrrw
+                        return new CsrInstruction.FromRegister(CsrInstruction.Operation.WRITE,
+                                csrIndex, destinationRegisterIndex, source);
+
+                    case 2: // csrrs
+                        return new CsrInstruction.FromRegister(CsrInstruction.Operation.SET_BITS,
+                                csrIndex, destinationRegisterIndex, source);
+
+                    case 3: // csrrc
+                        return new CsrInstruction.FromRegister(CsrInstruction.Operation.CLEAR_BITS,
+                                csrIndex, destinationRegisterIndex, source);
+
+                    case 5: // csrrwi
+                        return new CsrInstruction.FromImmediate(CsrInstruction.Operation.WRITE,
+                                csrIndex, destinationRegisterIndex, source);
+
+                    case 6: // csrrsi
+                        return new CsrInstruction.FromImmediate(CsrInstruction.Operation.SET_BITS,
+                                csrIndex, destinationRegisterIndex, source);
+
+                    case 7: // csrrci
+                        return new CsrInstruction.FromImmediate(CsrInstruction.Operation.CLEAR_BITS,
+                                csrIndex, destinationRegisterIndex, source);
+
+                    case 4:
+                    default:
+                        throw new InstructionDecodingException("unknown SYSTEM func3");
+
+                }
+            }
 
             case 29: // reserved
                 throw new InstructionDecodingException("reserved opcode: " + opcode);
